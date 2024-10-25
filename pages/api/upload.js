@@ -4,7 +4,7 @@ import csv from 'csv-parser';
 import XLSX from 'xlsx';
 import Contact from '../../models/contact'; 
 
-// Set up multer for file uploads
+
 const upload = multer({ dest: 'uploads/' });
 
 export const config = {
@@ -13,7 +13,6 @@ export const config = {
   },
 };
 
-// Ensure uploads directory exists
 if (!fs.existsSync('uploads/')) {
   fs.mkdirSync('uploads/');
 }
@@ -46,18 +45,18 @@ const validateAndSaveContacts = async (contacts) => {
   for (const contactData of contacts) {
     const { name, email, phone, address, timezone } = contactData;
 
-    // Validate required fields
+    
     if (!name || !email) {
       throw new Error('Name and email are required');
     }
 
-    // Check for existing contact
+    
     const existingContact = await Contact.findOne({ where: { email } });
     if (existingContact) {
       throw new Error(`Contact with email ${email} already exists`);
     }
 
-    // Save new contact
+    
     const contact = await Contact.create({ name, email, phone, address, timezone });
     savedContacts.push(contact);
   }
@@ -71,12 +70,12 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Error uploading file' });
       }
 
-      const { path } = req.file;  // Uploaded file path
-      const extension = path.split('.').pop();  // Get file extension
+      const { path } = req.file; 
+      const extension = path.split('.').pop();  
 
       let contacts = [];
       try {
-        // Parse the file based on its extension
+        
         if (extension === 'csv') {
           contacts = await parseCSV(path);
         } else if (extension === 'xlsx') {
@@ -87,12 +86,12 @@ export default async function handler(req, res) {
 
         const savedContacts = await validateAndSaveContacts(contacts);
         
-        // Clean up: Delete the file after processing
+
         fs.unlinkSync(path); 
         
         return res.status(201).json({ message: 'Contacts uploaded successfully', savedContacts });
       } catch (error) {
-        // Ensure cleanup occurs in case of an error
+       
         fs.unlinkSync(path); 
         return res.status(500).json({ error: error.message });
       }
