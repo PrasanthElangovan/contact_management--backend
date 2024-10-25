@@ -2,8 +2,9 @@ import multer from 'multer';
 import fs from 'fs';
 import csv from 'csv-parser';
 import XLSX from 'xlsx';
-import Contact from '../../../models/contact'; 
+import Contact from '../../models/contact'; 
 
+// Set up multer for file uploads
 const upload = multer({ dest: 'uploads/' });
 
 export const config = {
@@ -11,6 +12,11 @@ export const config = {
     bodyParser: false, 
   },
 };
+
+// Ensure uploads directory exists
+if (!fs.existsSync('uploads/')) {
+  fs.mkdirSync('uploads/');
+}
 
 const parseCSV = (filePath) => {
   return new Promise((resolve, reject) => {
@@ -40,15 +46,18 @@ const validateAndSaveContacts = async (contacts) => {
   for (const contactData of contacts) {
     const { name, email, phone, address, timezone } = contactData;
 
+    // Validate required fields
     if (!name || !email) {
       throw new Error('Name and email are required');
     }
 
+    // Check for existing contact
     const existingContact = await Contact.findOne({ where: { email } });
     if (existingContact) {
       throw new Error(`Contact with email ${email} already exists`);
     }
 
+    // Save new contact
     const contact = await Contact.create({ name, email, phone, address, timezone });
     savedContacts.push(contact);
   }
@@ -62,11 +71,12 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Error uploading file' });
       }
 
-      const { path } = req.file;
-      const extension = path.split('.').pop();
+      const { path } = req.file;  // Uploaded file path
+      const extension = path.split('.').pop();  // Get file extension
 
       let contacts = [];
       try {
+        // Parse the file based on its extension
         if (extension === 'csv') {
           contacts = await parseCSV(path);
         } else if (extension === 'xlsx') {
@@ -76,11 +86,15 @@ export default async function handler(req, res) {
         }
 
         const savedContacts = await validateAndSaveContacts(contacts);
+        
+        // Clean up: Delete the file after processing
         fs.unlinkSync(path); 
         
         return res.status(201).json({ message: 'Contacts uploaded successfully', savedContacts });
       } catch (error) {
-        return res.status(400).json({ error: error.message });
+        // Ensure cleanup occurs in case of an error
+        fs.unlinkSync(path); 
+        return res.status(500).json({ error: error.message });
       }
     });
   } else {
