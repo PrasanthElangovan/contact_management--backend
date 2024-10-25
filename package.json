@@ -2,6 +2,9 @@
   "name": "contact_management--backend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "postinstall": "npm install next",
     "dev": "cross-env PORT=4001 next dev",
