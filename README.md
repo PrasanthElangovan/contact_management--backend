@@ -23,7 +23,7 @@ This is a backend project built with Next.js, Sequelize, and MySQL for managing 
 
 1. Clone the repository:
 
--   git clone <your-repo-url>
+-   git clone [<your-repo-url>](https://github.com/PrasanthElangovan/contact_management--backend.git)
 
 
 2. Navigate into the project directory:

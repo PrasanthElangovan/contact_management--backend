@@ -1,4 +1,3 @@
-// pages/api/contacts/export.js
 import { Parser as Json2csvParser } from 'json2csv';
 import XLSX from 'xlsx';
 import Contact from '../../models/contact';
